@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyDesk – School Organiser Prototype</title>
+<style>
+:root{--bg:#F4F6FB;--card:#fff;--text:#111827;--muted:#4B5563;--pri:#1D4ED8;--pri-d:#1E3A8A;--ok:#047857;--warn:#B45309;--err:#B91C1C;--line:#D1D5DB;--fs:16px}
+body.hc{--bg:#000;--card:#000;--text:#fff;--muted:#fff;--pri:#FFFF00;--pri-d:#FFFF00;--line:#fff;--ok:#00FF7F;--warn:#FFD166;--err:#FF6B6B}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:var(--fs);background:var(--bg);color:var(--text);line-height:1.5}
+.skip{position:absolute;left:-999px;top:8px;background:var(--pri);color:#fff;padding:8px 14px;border-radius:6px;z-index:9}
+.skip:focus{left:8px}
+body.hc .skip{color:#000}
+:focus-visible{outline:3px solid #F59E0B;outline-offset:2px}
+body.hc :focus-visible{outline-color:#00FFFF}
+header{background:var(--pri-d);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 24px}
+body.hc header{background:#000;border-bottom:2px solid #fff;color:#fff}
+.logo{font-weight:700;font-size:1.4em}
+.logo span{color:#93C5FD}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{background:transparent;color:inherit;border:2px solid transparent;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+nav button[aria-current="page"]{background:#fff;color:var(--pri-d)}
+body.hc nav button[aria-current="page"]{background:#FFFF00;color:#000}
+nav button:hover{border-color:#93C5FD}
+main{max-width:1080px;margin:0 auto;padding:24px}
+h1{margin:0 0 4px;font-size:1.7em}
+h2{font-size:1.2em;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.screen{display:none}.screen.on{display:block}
+.btn{background:var(--pri);color:#fff;border:2px solid var(--pri);border-radius:8px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;min-height:44px}
+body.hc .btn{color:#000}
+.btn.sec{background:transparent;color:var(--pri)}
+.btn:hover{filter:brightness(1.1)}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:.8em;font-weight:700;border:1px solid currentColor}
+.t-test{color:var(--err)}.t-assign{color:var(--pri)}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+ul.list li:last-child{border:0}
+ul.list li.done .tt{text-decoration:line-through;color:var(--muted)}
+.tt{flex:1}.meta{color:var(--muted);font-size:.88em}
+input[type=checkbox]{width:24px;height:24px;accent-color:var(--pri)}
+label{display:block;font-weight:700;margin:12px 0 4px}
+input[type=text],input[type=date],select,textarea{width:100%;padding:10px;border:2px solid var(--line);border-radius:8px;font:inherit;background:var(--card);color:var(--text);min-height:44px}
+.err{color:var(--err);font-weight:700;margin-top:4px;display:none}
+.invalid{border-color:var(--err)!important}
+.ring{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p)*1%),#E5E7EB 0)}
+body.hc .ring{background:conic-gradient(var(--ok) calc(var(--p)*1%),#444 0)}
+.ring div{width:98px;height:98px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:700;font-size:1.5em}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:10px;display:none;gap:14px;align-items:center;border:2px solid #fff}
+.toast button{background:none;border:0;color:#93C5FD;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .h{font-weight:700;text-align:center;color:var(--muted)}
+.cal button{min-height:62px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text);font:inherit;text-align:left;padding:6px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between}
+.cal button[aria-pressed=true]{border:3px solid var(--pri)}
+.dot{font-size:.7em;font-weight:700}
+.dot.test{color:var(--err)}.dot.assign{color:var(--pri)}
+.today{background:#DBEAFE!important}body.hc .today{background:#222!important}
+.msg{padding:10px 12px;border-radius:10px;background:#EEF2FF;margin:8px 0;max-width:85%}
+body.hc .msg{background:#111;border:1px solid #fff}
+.msg.me{background:#DCFCE7;margin-left:auto}body.hc .msg.me{background:#003300}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:4px 6px 4px 0;font-weight:700}
+.switch{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.switch input{width:28px;height:28px}
+.banner{background:#DCFCE7;color:#14532D;border:2px solid #16A34A;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:700}
+body.hc .banner{background:#000;color:#00FF7F;border-color:#00FF7F}
+@media (prefers-reduced-motion:no-preference){.card{transition:box-shadow .2s}.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header>
+  <div class="logo">Study<span>Desk</span></div>
+  <nav aria-label="Main navigation">
+    <button data-s="dash" aria-current="page">Dashboard</button>
+    <button data-s="tasks">Tasks</button>
+    <button data-s="cal">Calendar</button>
+    <button data-s="mat">Materials</button>
+    <button data-s="grp">Study Groups</button>
+    <button data-s="set">Settings</button>
+  </nav>
+</header>
+<main id="main" tabindex="-1">
+
+<section class="screen on" id="dash" aria-labelledby="h-dash">
+  <h1 id="h-dash">Good afternoon, Hulisani</h1>
+  <p class="sub">Tuesday, 3 November 2026 · You are doing well, keep the momentum going.</p>
+  <div class="banner" role="status">You have completed 3 tasks this week. That is a 4-day study streak!</div>
+  <div class="grid">
+    <div class="card"><h2>Weekly progress</h2>
+      <div class="row"><div class="ring" id="ring" style="--p:50"><div id="ringTxt">50%</div></div>
+      <div><p id="progTxt" style="margin:0"></p><p class="meta">Tick off a task to watch the ring fill.</p></div></div>
+    </div>
+    <div class="card"><h2>Next deadlines</h2><ul class="list" id="dashList"></ul>
+      <button class="btn sec" data-go="tasks">View all tasks</button></div>
+    <div class="card"><h2>Achievements</h2>
+      <span class="badge">🔥 4-day streak</span><span class="badge">✅ 10 tasks done</span><span class="badge">📚 Library explorer</span>
+      <p class="meta">Badges are private by default and can be shared with your study group.</p></div>
+    <div class="card"><h2>Quick actions</h2>
+      <div class="row"><button class="btn" data-go="tasks" data-focus="1">+ Add a task</button><button class="btn sec" data-go="mat">Find study notes</button></div></div>
+  </div>
+</section>
+
+<section class="screen" id="tasks" aria-labelledby="h-tasks">
+  <h1 id="h-tasks">Tasks</h1><p class="sub">Track assignments and tests. Everything you add appears on your calendar.</p>
+  <div class="grid">
+    <div class="card"><h2>Your tasks</h2>
+      <div class="row" role="group" aria-label="Filter tasks">
+        <button class="btn sec f" data-f="all">All</button><button class="btn sec f" data-f="assign">Assignments</button><button class="btn sec f" data-f="test">Tests</button></div>
+      <ul class="list" id="taskList"></ul></div>
+    <div class="card"><h2>Add a new task</h2>
+      <div id="formArea">
+        <label for="tTitle">Task name</label><input type="text" id="tTitle" placeholder="e.g. HCIN6222 POE Part 3" aria-describedby="eTitle">
+        <div class="err" id="eTitle" role="alert">⚠ Please enter a task name.</div>
+        <label for="tSub">Subject</label>
+        <select id="tSub"><option>Human-Computer Interaction</option><option>Database Systems</option><option>Programming</option><option>Information Security</option></select>
+        <label for="tType">Type</label>
+        <select id="tType"><option value="assign">Assignment</option><option value="test">Test</option></select>
+        <label for="tDate">Due date</label><input type="date" id="tDate" aria-describedby="eDate">
+        <div class="err" id="eDate" role="alert">⚠ Please choose a due date.</div>
+        <p style="margin-top:16px"><button class="btn" id="addBtn">Add task</button></p>
+      </div></div>
+  </div>
+</section>
+
+<section class="screen" id="cal" aria-labelledby="h-cal">
+  <h1 id="h-cal">Calendar – November 2026</h1><p class="sub">Select a date to see what is due. Red = test, blue = assignment.</p>
+  <div class="grid"><div class="card"><div class="cal" id="calGrid" role="group" aria-label="November 2026"></div></div>
+  <div class="card"><h2 id="calHead">Due on 3 November</h2><ul class="list" id="calList"></ul></div></div>
+</section>
+
+<section class="screen" id="mat" aria-labelledby="h-mat">
+  <h1 id="h-mat">Study materials</h1><p class="sub">Search notes, past papers and guides for all your modules.</p>
+  <label for="q">Search materials</label><input type="text" id="q" placeholder="Try “SQL” or “WCAG”">
+  <div class="grid" id="matGrid" style="margin-top:16px" aria-live="polite"></div>
+</section>
+
+<section class="screen" id="grp" aria-labelledby="h-grp">
+  <h1 id="h-grp">Study groups</h1><p class="sub">Study together, share notes and keep each other on track.</p>
+  <div class="grid">
+    <div class="card"><h2>My groups</h2><ul class="list">
+      <li><span class="tt"><strong>HCI Exam Crew</strong><br><span class="meta">5 members · 2 online</span></span><button class="btn sec">Open</button></li>
+      <li><span class="tt"><strong>SQL Study Squad</strong><br><span class="meta">4 members · 1 online</span></span><button class="btn sec">Open</button></li></ul>
+      <button class="btn" style="margin-top:10px">+ Create a group</button></div>
+    <div class="card"><h2>HCI Exam Crew – chat</h2>
+      <div id="chat" aria-live="polite"><div class="msg"><strong>Thandi:</strong> I uploaded my WCAG summary to Materials 📄</div><div class="msg"><strong>Sipho:</strong> Thanks! Who is joining the call at 18:00?</div></div>
+      <label for="chatIn">Message</label>
+      <div class="row"><input type="text" id="chatIn" style="flex:1" placeholder="Type a message"><button class="btn" id="send">Send</button></div>
+      <p class="meta">Be kind: report or mute anyone using the ⋯ menu on a message.</p></div>
+  </div>
+</section>
+
+<section class="screen" id="set" aria-labelledby="h-set">
+  <h1 id="h-set">Settings and accessibility</h1><p class="sub">Make StudyDesk work the way you do.</p>
+  <div class="grid"><div class="card"><h2>Display</h2>
+    <div class="switch"><span id="lblFs">Text size</span><span class="row" role="group" aria-labelledby="lblFs"><button class="btn sec" id="fsM" aria-label="Decrease text size">A−</button><button class="btn sec" id="fsP" aria-label="Increase text size">A+</button></span></div>
+    <div class="switch"><label for="hc" style="margin:0">High contrast mode</label><input type="checkbox" id="hc"></div>
+    <div class="switch"><label for="rm" style="margin:0">Reduce motion</label><input type="checkbox" id="rm"></div></div>
+  <div class="card"><h2>Reminders</h2>
+    <div class="switch"><label for="rem" style="margin:0">Deadline reminders</label><input type="checkbox" id="rem" checked></div>
+    <label for="lead">Remind me</label><select id="lead"><option>1 day before</option><option>3 days before</option><option>1 week before</option></select>
+    <p class="meta">All features work with keyboard only and with screen readers.</p></div></div>
+</section>
+</main>
+<div class="toast" id="toast" role="status"><span id="toastTxt"></span><button id="undo">Undo</button></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let tasks=[
+ {t:"HCIN6222 POE Part 3",s:"Human-Computer Interaction",d:"2026-11-12",ty:"assign",done:false},
+ {t:"DATA6222 Practical",s:"Database Systems",d:"2026-11-06",ty:"assign",done:true},
+ {t:"PROG6212 Test 2",s:"Programming",d:"2026-11-09",ty:"test",done:false},
+ {t:"Information Security Quiz",s:"Information Security",d:"2026-11-17",ty:"test",done:true},
+ {t:"HCI Case Study reflection",s:"Human-Computer Interaction",d:"2026-11-24",ty:"assign",done:false},
+ {t:"SQL stored procedures lab",s:"Database Systems",d:"2026-11-03",ty:"assign",done:true}];
+let filter="all",selDate="2026-11-03",last=null;
+const fmt=d=>new Date(d+"T00:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"});
+const li=(x,i,box)=>`<li class="${x.done?'done':''}">${box?`<input type="checkbox" ${x.done?'checked':''} data-i="${i}" aria-label="Mark ${x.t} as done">`:''}<span class="tt">${x.t}<br><span class="meta">${x.s} · Due ${fmt(x.d)}</span></span><span class="pill t-${x.ty}">${x.ty==='test'?'Test':'Assignment'}</span></li>`;
+function render(){
+ const done=tasks.filter(x=>x.done).length,p=Math.round(done/tasks.length*100);
+ $("#ring").style.setProperty("--p",p);$("#ringTxt").textContent=p+"%";
+ $("#progTxt").innerHTML=`<strong>${done} of ${tasks.length}</strong> tasks complete`;
+ $("#dashList").innerHTML=tasks.filter(x=>!x.done).sort((a,b)=>a.d.localeCompare(b.d)).slice(0,3).map(x=>li(x)).join("")||"<li>All caught up! 🎉</li>";
+ $("#taskList").innerHTML=tasks.map((x,i)=>[x,i]).filter(([x])=>filter==="all"||x.ty===filter).sort((a,b)=>a[0].d.localeCompare(b[0].d)).map(([x,i])=>li(x,i,true)).join("");
+ $$(".f").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===filter));
+ $$("#taskList input").forEach(c=>c.onchange=()=>{tasks[c.dataset.i].done=c.checked;render();if(c.checked)toast("Well done! Task completed.");});
+ drawCal();
+}
+function drawCal(){
+ let h=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="h" aria-hidden="true">${d}</div>`).join("");
+ for(let d=1;d<=30;d++){const iso=`2026-11-${String(d).padStart(2,"0")}`;const ts=tasks.filter(x=>x.d===iso);
+  h+=(d===1?"":"")+`<button data-d="${iso}" aria-pressed="${iso===selDate}" class="${d===3?'today':''}" aria-label="${d} November, ${ts.length} due"><span>${d}</span><span>${ts.map(x=>`<span class="dot ${x.ty}">● ${x.ty==='test'?'Test':'Due'}</span>`).join("<br>")}</span></button>`;}
+ $("#calGrid").innerHTML=h;
+ $$("#calGrid button").forEach(b=>b.onclick=()=>{selDate=b.dataset.d;drawCal();});
+ const ts=tasks.filter(x=>x.d===selDate);
+ $("#calHead").textContent="Due on "+new Date(selDate+"T00:00").toLocaleDateString("en-ZA",{day:"numeric",month:"long"});
+ $("#calList").innerHTML=ts.map(x=>li(x)).join("")||"<li>Nothing due. Enjoy the free time!</li>";
+}
+function toast(m,u){$("#toastTxt").textContent=m;$("#undo").style.display=u?"inline":"none";const t=$("#toast");t.style.display="flex";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",4000);}
+function go(s,foc){$$(".screen").forEach(x=>x.classList.toggle("on",x.id===s));$$("nav button").forEach(b=>b.toggleAttribute("aria-current",b.dataset.s===s)||0);$$("nav button").forEach(b=>{if(b.dataset.s===s)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});if(foc)$("#tTitle").focus();else $("#main").focus();}
+$$("nav button").forEach(b=>b.onclick=()=>go(b.dataset.s));
+$$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,b.dataset.focus));
+$$(".f").forEach(b=>b.onclick=()=>{filter=b.dataset.f;render();});
+$("#addBtn").onclick=()=>{
+ const t=$("#tTitle").value.trim(),d=$("#tDate").value;
+ $("#eTitle").style.display=t?"none":"block";$("#tTitle").classList.toggle("invalid",!t);
+ $("#eDate").style.display=d?"none":"block";$("#tDate").classList.toggle("invalid",!d);
+ if(!t||!d)return;
+ last={t,s:$("#tSub").value,d,ty:$("#tType").value,done:false};tasks.push(last);
+ $("#tTitle").value="";$("#tDate").value="";render();toast("Task added to your calendar.",true);};
+$("#undo").onclick=()=>{tasks=tasks.filter(x=>x!==last);render();$("#toast").style.display="none";};
+const mats=[["Database Systems","SQL Joins Cheat Sheet","PDF · 2 pages"],["Database Systems","Normalisation Past Paper 2025","PDF · 8 pages"],["Human-Computer Interaction","WCAG 2.0 Summary Notes","PDF · 4 pages"],["Human-Computer Interaction","Design Principles Slide Deck","PPTX · 24 slides"],["Programming","C# Collections Revision Guide","PDF · 6 pages"],["Information Security","CIA Triad Study Notes","PDF · 3 pages"]];
+function drawMat(){const q=$("#q").value.toLowerCase();$("#matGrid").innerHTML=mats.filter(m=>m.join(" ").toLowerCase().includes(q)).map(m=>`<div class="card"><span class="pill t-assign">${m[0]}</span><h2 style="margin-top:8px">${m[1]}</h2><p class="meta">${m[2]}</p><button class="btn">Open</button> <button class="btn sec">Save</button></div>`).join("")||"<p>No materials match your search. Try a different keyword.</p>";}
+$("#q").oninput=drawMat;
+$("#send").onclick=()=>{const v=$("#chatIn").value.trim();if(!v)return;$("#chat").insertAdjacentHTML("beforeend",`<div class="msg me"><strong>You:</strong> ${v.replace(/</g,"&lt;")}</div>`);$("#chatIn").value="";};
+let fs=16;const setFs=v=>{fs=Math.max(14,Math.min(22,v));document.documentElement.style.setProperty("--fs",fs+"px")};
+$("#fsP").onclick=()=>setFs(fs+2);$("#fsM").onclick=()=>setFs(fs-2);
+$("#hc").onchange=e=>document.body.classList.toggle("hc",e.target.checked);
+render();drawMat();
+</script>
+</body>
+</html>
